@@ -22,7 +22,7 @@ class InjectExtension extends Nette\DI\CompilerExtension
 	public function beforeCompile()
 	{
 		foreach ($this->getContainerBuilder()->getDefinitions() as $name => $def) {
-			if (!$def->inject || !$def->class) {
+			if (empty($def->tags['inject']) || !$def->class) {
 				continue;
 			}
 

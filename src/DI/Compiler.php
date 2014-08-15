@@ -325,7 +325,7 @@ class Compiler extends Nette\Object
 
 		if (isset($config['inject'])) {
 			Validators::assertField($config, 'inject', 'bool');
-			$definition->setInject($config['inject']);
+			$definition->addTag('inject', $config['inject']);
 		}
 
 		if (isset($config['run'])) {

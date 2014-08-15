@@ -55,6 +55,10 @@ class TemplatesExtension extends Nette\DI\CompilerExtension
 					$setups[] = $setup instanceof Statement ? $setup : new Statement($setup);
 				}
 
+				if (isset($template['inject'])) {
+					$template['tags']['inject'] = $template['inject'];
+				}
+
 				foreach ($template['tags'] as $tag => $attrs) {
 					if (is_int($tag) && is_string($attrs)) {
 						list($tag, $attrs) = array($attrs, TRUE);
@@ -62,10 +66,6 @@ class TemplatesExtension extends Nette\DI\CompilerExtension
 					if (!isset($def->tags[$tag])) {
 						$def->addTag($tag, $attrs);
 					}
-				}
-
-				if ($template['inject']) {
-					$def->setInject(TRUE);
 				}
 			}
 			$def->setup = array_merge($setups, $def->setup);

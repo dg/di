@@ -54,11 +54,11 @@ services:
 $builder = $compiler->getContainerBuilder();
 
 Assert::same(
-	array('a' => TRUE, 'tag' => 2, 'b' => TRUE),
+	array('a' => TRUE, 'tag' => 2, 'inject' => TRUE, 'b' => TRUE),
 	$builder->getDefinition('one')->tags
 );
 
-Assert::true( $builder->getDefinition('one')->getInject() );
+Assert::true( $builder->getDefinition('one')->tags['inject'] );
 
 Assert::equal( array(
 	new Statement(array('@self', 'setup'), array('Object')),
