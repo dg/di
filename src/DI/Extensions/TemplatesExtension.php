@@ -39,6 +39,16 @@ class TemplatesExtension extends Nette\DI\CompilerExtension
 
 	public function beforeCompile()
 	{
+		// load additional configuration here, because in loadConfiguration(),
+		// there could have been added more extensions that wouldn't have been processed otherwise
+		foreach ($this->compiler->getExtensions('Nette\DI\Extensions\ITemplateProvider') as $provider) {
+			/** @var ITemplateProvider $provider */
+			foreach ($provider->getDiTemplates() as $class => $info) {
+				$this->validate($info, $this->defaults, $this->prefix($class));
+				$this->templates[strtolower($class)] = $info + $this->defaults;
+			}
+		}
+
 		foreach ($this->getContainerBuilder()->getDefinitions() as $name => $def) {
 			if (!$def->class) {
 				continue;
