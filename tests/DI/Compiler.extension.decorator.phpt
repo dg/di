@@ -41,6 +41,7 @@ decorator:
 			- setup(Iface)
 			- setup
 		tags: [b, tag: 1]
+		autowired: no 
 
 services:
 	one:
@@ -59,6 +60,8 @@ Assert::same(
 );
 
 Assert::true( $builder->getDefinition('one')->getTag('inject') );
+
+Assert::false( $builder->getDefinition('one')->isAutowired() );
 
 Assert::equal( array(
 	new Statement(array('@self', 'setup'), array('Service')),
@@ -88,6 +91,7 @@ class DecoratorProviderExtension extends Nette\DI\CompilerExtension implements N
 					'b',
 					'tag' => 1,
 				),
+				'autowired' => FALSE,
 			),
 		);
 	}
@@ -113,6 +117,8 @@ Assert::same(
 );
 
 Assert::true( $builder->getDefinition('one')->getTag('inject') );
+
+Assert::false( $builder->getDefinition('one')->isAutowired() );
 
 Assert::equal( array(
 	new Statement(array('@self', 'setup'), array('Service')),
