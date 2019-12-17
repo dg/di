@@ -58,6 +58,12 @@ final class ServiceDefinition extends Definition
 	 */
 	public function setType(?string $type)
 	{
+		if ($type && Nette\DI\Helpers::isGeneric($type, $generic, $params)) {
+			$params[] = $generic;
+			if (!array_filter($params, function ($t) { return !class_exists($t) && !interface_exists($t); })) {
+				class_alias($generic, $type);
+			}
+		}
 		return parent::setType($type);
 	}
 

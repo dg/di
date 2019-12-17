@@ -183,8 +183,22 @@ final class Helpers
 
 	public static function normalizeClass(string $type): string
 	{
+		if (self::isGeneric($type, $generic, $params)) {
+			return self::normalizeClass($generic) . '<' . implode(',', array_map([self::class, 'normalizeClass'], $params)) . '>';
+		}
 		return class_exists($type) || interface_exists($type)
 			? (new \ReflectionClass($type))->getName()
 			: $type;
+	}
+
+
+	public static function isGeneric(string $type, &$generic = null, &$params = []): bool
+	{
+		if (preg_match('~^([\w\\\\]+)<([\w\\\\,]*)>$~', $type, $m)) {
+			$generic = $m[1];
+			$params = $m[2] ? explode(',', $m[2]) : [];
+			return true;
+		}
+		return false;
 	}
 }

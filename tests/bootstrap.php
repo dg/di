@@ -83,6 +83,7 @@ function createContainer($source, $config = null, $params = []): ?Nette\DI\Conta
 	}
 
 	file_put_contents(getTempDir() . '/code.php', "<?php\n\n$code");
+	file_put_contents(__DIR__ . '/code.php', "<?php\n\n$code");
 	require getTempDir() . '/code.php';
 	return new $class($params);
 }

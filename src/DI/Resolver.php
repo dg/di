@@ -168,6 +168,13 @@ class Resolver
 		$entity = $this->normalizeEntity($statement);
 		$arguments = $this->convertReferences($statement->arguments);
 		$getter = function (string $type, bool $single) {
+			if (Helpers::isGeneric($type, $generic, $params)) {
+				try {
+					return $this->getByType($type);
+				} catch (MissingServiceException $e) {
+					return new Statement($this->builder->getDefinitionByType($generic . '<>')->getEntity(), $params);
+				}
+			}
 			return $single
 				? $this->getByType($type)
 				: array_values(array_filter($this->builder->findAutowired($type), function ($obj) { return $obj !== $this->currentService; }));
@@ -505,8 +512,13 @@ class Resolver
 		$type = Reflection::getParameterType($parameter);
 		$method = $parameter->getDeclaringFunction();
 		$desc = '$' . $parameter->getName() . ' in ' . Reflection::toString($method) . '()';
+		$docType = preg_match('#@param[ \t]+(\S+)[ \t]+\$' . $parameter->getName() . '#', (string) $method->getDocComment(), $m) ? $m[1] : null;
 
 		if ($type && !Reflection::isBuiltinType($type)) {
+			if ($docType && Helpers::isGeneric($docType, $foo, $params)) {
+				$params = array_map(function ($t) use ($method) { return Reflection::expandClassName($t, $method->getDeclaringClass()); }, $params);
+				$type .= '<' . implode(',', $params) . '>';
+			}
 			try {
 				$res = $getter($type, true);
 			} catch (MissingServiceException $e) {
@@ -525,8 +537,8 @@ class Resolver
 		} elseif (
 			$method instanceof \ReflectionMethod
 			&& $parameter->isArray()
-			&& preg_match('#@param[ \t]+([\w\\\\]+)\[\][ \t]+\$' . $parameter->getName() . '#', (string) $method->getDocComment(), $m)
-			&& ($itemType = Reflection::expandClassName($m[1], $method->getDeclaringClass()))
+			&& $docType && substr($docType, -2) === '[]'
+			&& ($itemType = Reflection::expandClassName(substr($docType, 0, -2), $method->getDeclaringClass()))
 			&& (class_exists($itemType) || interface_exists($itemType))
 		) {
 			return $getter($itemType, false);
